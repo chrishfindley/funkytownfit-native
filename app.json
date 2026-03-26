@@ -1,30 +1,53 @@
 {
   "expo": {
-    "name": "funkytownfit-native",
-    "slug": "funkytownfit-native",
+    "name": "Funkytown Fit",
+    "slug": "funkytownfit",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0D0A06"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.funkytownfit.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used for scanning food barcodes and AI food photo logging"
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0D0A06",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.funkytownfit.app",
+      "permissions": [
+        "CAMERA",
+        "VIBRATE"
+      ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Funkytown Fit to access your camera for food barcode scanning and AI food photo logging."
+        }
+      ],
+      "expo-font",
+      "expo-web-browser"
+    ],
+    "scheme": "funkytownfit",
+    "extra": {
+      "supabaseUrl": "REPLACE_WITH_SUPABASE_URL",
+      "supabaseAnonKey": "REPLACE_WITH_SUPABASE_ANON_KEY",
+      "googlePlacesApiKey": "REPLACE_WITH_GOOGLE_PLACES_KEY",
+      "spotifyClientId": "REPLACE_WITH_SPOTIFY_CLIENT_ID",
+      "anthropicApiKey": "REPLACE_WITH_ANTHROPIC_KEY"
     }
   }
 }
