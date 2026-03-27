@@ -105,7 +105,7 @@ function buildLeafletHtml(lat: number, lng: number, name: string, color: string)
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0F1117; }
+    body { background: #0A0806; }
     #map { width: 100%; height: 100vh; }
     .custom-icon {
       background: #${markerColor};
@@ -528,7 +528,7 @@ const ss = StyleSheet.create({
   logoTitle: {
     fontSize: 30,
     fontWeight: '900',
-    color: '#F0ECE4',
+    color: '#FFFFFF',
     letterSpacing: 6,
     textAlign: 'center',
   },
@@ -542,7 +542,7 @@ const ss = StyleSheet.create({
   tagline: {
     fontSize: 18,
     fontWeight: '300',
-    color: '#F0ECE4',
+    color: '#FFFFFF',
     letterSpacing: 0.5,
     textAlign: 'center',
   },
@@ -554,7 +554,7 @@ const ss = StyleSheet.create({
   },
   poweredBy: {
     fontSize: 11,
-    color: 'rgba(240,236,228,0.45)',
+    color: 'rgba(255,255,255,0.40)',
     letterSpacing: 1,
     textAlign: 'center',
   },
