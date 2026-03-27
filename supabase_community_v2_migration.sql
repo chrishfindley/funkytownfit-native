@@ -84,93 +84,99 @@ create index if not exists idx_msgs_created on messages(created_at desc);
 -- ─── 5. RLS: friendships ─────────────────────────────────────────────────────
 alter table friendships enable row level security;
 
--- Both parties see their own friendship rows
-create policy "friendships_select" on friendships
-  for select using (
-    auth.uid() = requester_id or auth.uid() = addressee_id
-  );
-
--- Requester can create the request
-create policy "friendships_insert" on friendships
-  for insert with check (auth.uid() = requester_id);
-
--- Either party can update (accept/decline/block)
-create policy "friendships_update" on friendships
-  for update using (
-    auth.uid() = requester_id or auth.uid() = addressee_id
-  );
-
--- Either party can delete (unfriend)
-create policy "friendships_delete" on friendships
-  for delete using (
-    auth.uid() = requester_id or auth.uid() = addressee_id
-  );
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='friendships' and policyname='friendships_select') then
+    execute $p$ create policy "friendships_select" on friendships for select using (auth.uid() = requester_id or auth.uid() = addressee_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='friendships' and policyname='friendships_insert') then
+    execute $p$ create policy "friendships_insert" on friendships for insert with check (auth.uid() = requester_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='friendships' and policyname='friendships_update') then
+    execute $p$ create policy "friendships_update" on friendships for update using (auth.uid() = requester_id or auth.uid() = addressee_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='friendships' and policyname='friendships_delete') then
+    execute $p$ create policy "friendships_delete" on friendships for delete using (auth.uid() = requester_id or auth.uid() = addressee_id); $p$;
+  end if;
+end $$;
 
 -- ─── 6. RLS: fit_partnerships ────────────────────────────────────────────────
 alter table fit_partnerships enable row level security;
 
-create policy "fp_select" on fit_partnerships
-  for select using (
-    auth.uid() = requester_id or auth.uid() = partner_id
-  );
-
-create policy "fp_insert" on fit_partnerships
-  for insert with check (auth.uid() = requester_id);
-
-create policy "fp_update" on fit_partnerships
-  for update using (
-    auth.uid() = requester_id or auth.uid() = partner_id
-  );
-
-create policy "fp_delete" on fit_partnerships
-  for delete using (
-    auth.uid() = requester_id or auth.uid() = partner_id
-  );
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='fit_partnerships' and policyname='fp_select') then
+    execute $p$ create policy "fp_select" on fit_partnerships for select using (auth.uid() = requester_id or auth.uid() = partner_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='fit_partnerships' and policyname='fp_insert') then
+    execute $p$ create policy "fp_insert" on fit_partnerships for insert with check (auth.uid() = requester_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='fit_partnerships' and policyname='fp_update') then
+    execute $p$ create policy "fp_update" on fit_partnerships for update using (auth.uid() = requester_id or auth.uid() = partner_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='fit_partnerships' and policyname='fp_delete') then
+    execute $p$ create policy "fp_delete" on fit_partnerships for delete using (auth.uid() = requester_id or auth.uid() = partner_id); $p$;
+  end if;
+end $$;
 
 -- ─── 7. RLS: conversations ───────────────────────────────────────────────────
 alter table conversations enable row level security;
 
-create policy "convos_select" on conversations
-  for select using (
-    auth.uid() = participant1_id or auth.uid() = participant2_id
-  );
-
--- Either participant can create a convo
-create policy "convos_insert" on conversations
-  for insert with check (
-    auth.uid() = participant1_id or auth.uid() = participant2_id
-  );
-
--- Either participant can update (mark read, update last_message cache)
-create policy "convos_update" on conversations
-  for update using (
-    auth.uid() = participant1_id or auth.uid() = participant2_id
-  );
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='conversations' and policyname='convos_select') then
+    execute $p$ create policy "convos_select" on conversations for select using (auth.uid() = participant1_id or auth.uid() = participant2_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='conversations' and policyname='convos_insert') then
+    execute $p$ create policy "convos_insert" on conversations for insert with check (auth.uid() = participant1_id or auth.uid() = participant2_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='conversations' and policyname='convos_update') then
+    execute $p$ create policy "convos_update" on conversations for update using (auth.uid() = participant1_id or auth.uid() = participant2_id); $p$;
+  end if;
+end $$;
 
 -- ─── 8. RLS: messages ────────────────────────────────────────────────────────
 alter table messages enable row level security;
 
--- Only conversation participants can read messages
-create policy "msgs_select" on messages
-  for select using (
-    exists (
-      select 1 from conversations c
-      where c.id = messages.conversation_id
-        and (c.participant1_id = auth.uid() or c.participant2_id = auth.uid())
-    )
-  );
-
--- Only the sender can insert
-create policy "msgs_insert" on messages
-  for insert with check (auth.uid() = sender_id);
-
--- Sender can update (edit) their own messages
-create policy "msgs_update" on messages
-  for update using (auth.uid() = sender_id);
-
--- Sender can delete their own messages
-create policy "msgs_delete" on messages
-  for delete using (auth.uid() = sender_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='messages' and policyname='msgs_select') then
+    execute $p$ create policy "msgs_select" on messages for select using (
+      exists (
+        select 1 from conversations c
+        where c.id = messages.conversation_id
+          and (c.participant1_id = auth.uid() or c.participant2_id = auth.uid())
+      )
+    ); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='messages' and policyname='msgs_insert') then
+    execute $p$ create policy "msgs_insert" on messages for insert with check (auth.uid() = sender_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='messages' and policyname='msgs_update') then
+    execute $p$ create policy "msgs_update" on messages for update using (auth.uid() = sender_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='messages' and policyname='msgs_delete') then
+    execute $p$ create policy "msgs_delete" on messages for delete using (auth.uid() = sender_id); $p$;
+  end if;
+end $$;
 
 -- ─── 9. Fit-partner data access: extend existing RLS ─────────────────────────
 -- Allow fit partners to read each other's workout_logs, food_log, weight_log.

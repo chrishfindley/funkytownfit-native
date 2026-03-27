@@ -105,83 +105,121 @@ create index if not exists idx_rsvps_user  on event_rsvps(user_id);
 -- ─── 7. RLS: community_posts ──────────────────────────────────────────────────
 alter table community_posts enable row level security;
 
--- Everyone authenticated can read posts
-create policy "posts_select" on community_posts
-  for select using (auth.uid() is not null);
-
--- Only the author can insert
-create policy "posts_insert" on community_posts
-  for insert with check (auth.uid() = user_id);
-
--- Only the author can update/delete
-create policy "posts_update" on community_posts
-  for update using (auth.uid() = user_id);
-
-create policy "posts_delete" on community_posts
-  for delete using (auth.uid() = user_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='community_posts' and policyname='posts_select') then
+    execute $p$ create policy "posts_select" on community_posts for select using (auth.uid() is not null); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='community_posts' and policyname='posts_insert') then
+    execute $p$ create policy "posts_insert" on community_posts for insert with check (auth.uid() = user_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='community_posts' and policyname='posts_update') then
+    execute $p$ create policy "posts_update" on community_posts for update using (auth.uid() = user_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='community_posts' and policyname='posts_delete') then
+    execute $p$ create policy "posts_delete" on community_posts for delete using (auth.uid() = user_id); $p$;
+  end if;
+end $$;
 
 -- ─── 8. RLS: post_likes ───────────────────────────────────────────────────────
 alter table post_likes enable row level security;
 
-create policy "likes_select" on post_likes
-  for select using (auth.uid() is not null);
-
-create policy "likes_insert" on post_likes
-  for insert with check (auth.uid() = user_id);
-
-create policy "likes_delete" on post_likes
-  for delete using (auth.uid() = user_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='post_likes' and policyname='likes_select') then
+    execute $p$ create policy "likes_select" on post_likes for select using (auth.uid() is not null); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='post_likes' and policyname='likes_insert') then
+    execute $p$ create policy "likes_insert" on post_likes for insert with check (auth.uid() = user_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='post_likes' and policyname='likes_delete') then
+    execute $p$ create policy "likes_delete" on post_likes for delete using (auth.uid() = user_id); $p$;
+  end if;
+end $$;
 
 -- ─── 9. RLS: post_comments ────────────────────────────────────────────────────
 alter table post_comments enable row level security;
 
-create policy "comments_select" on post_comments
-  for select using (auth.uid() is not null);
-
-create policy "comments_insert" on post_comments
-  for insert with check (auth.uid() = user_id);
-
-create policy "comments_delete" on post_comments
-  for delete using (auth.uid() = user_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='post_comments' and policyname='comments_select') then
+    execute $p$ create policy "comments_select" on post_comments for select using (auth.uid() is not null); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='post_comments' and policyname='comments_insert') then
+    execute $p$ create policy "comments_insert" on post_comments for insert with check (auth.uid() = user_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='post_comments' and policyname='comments_delete') then
+    execute $p$ create policy "comments_delete" on post_comments for delete using (auth.uid() = user_id); $p$;
+  end if;
+end $$;
 
 -- ─── 10. RLS: user_follows ────────────────────────────────────────────────────
 alter table user_follows enable row level security;
 
-create policy "follows_select" on user_follows
-  for select using (auth.uid() is not null);
-
-create policy "follows_insert" on user_follows
-  for insert with check (auth.uid() = follower_id);
-
-create policy "follows_delete" on user_follows
-  for delete using (auth.uid() = follower_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='user_follows' and policyname='follows_select') then
+    execute $p$ create policy "follows_select" on user_follows for select using (auth.uid() is not null); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='user_follows' and policyname='follows_insert') then
+    execute $p$ create policy "follows_insert" on user_follows for insert with check (auth.uid() = follower_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='user_follows' and policyname='follows_delete') then
+    execute $p$ create policy "follows_delete" on user_follows for delete using (auth.uid() = follower_id); $p$;
+  end if;
+end $$;
 
 -- ─── 11. RLS: community_events ────────────────────────────────────────────────
 alter table community_events enable row level security;
 
--- Everyone can read events
-create policy "events_select" on community_events
-  for select using (auth.uid() is not null);
-
--- Any authenticated user can create events
-create policy "events_insert" on community_events
-  for insert with check (auth.uid() is not null);
-
--- Creator or admin can update
-create policy "events_update" on community_events
-  for update using (auth.uid() = created_by);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='community_events' and policyname='events_select') then
+    execute $p$ create policy "events_select" on community_events for select using (auth.uid() is not null); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='community_events' and policyname='events_insert') then
+    execute $p$ create policy "events_insert" on community_events for insert with check (auth.uid() is not null); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='community_events' and policyname='events_update') then
+    execute $p$ create policy "events_update" on community_events for update using (auth.uid() = created_by); $p$;
+  end if;
+end $$;
 
 -- ─── 12. RLS: event_rsvps ─────────────────────────────────────────────────────
 alter table event_rsvps enable row level security;
 
-create policy "rsvps_select" on event_rsvps
-  for select using (auth.uid() is not null);
-
-create policy "rsvps_insert" on event_rsvps
-  for insert with check (auth.uid() = user_id);
-
-create policy "rsvps_delete" on event_rsvps
-  for delete using (auth.uid() = user_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='event_rsvps' and policyname='rsvps_select') then
+    execute $p$ create policy "rsvps_select" on event_rsvps for select using (auth.uid() is not null); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='event_rsvps' and policyname='rsvps_insert') then
+    execute $p$ create policy "rsvps_insert" on event_rsvps for insert with check (auth.uid() = user_id); $p$;
+  end if;
+end $$;
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='event_rsvps' and policyname='rsvps_delete') then
+    execute $p$ create policy "rsvps_delete" on event_rsvps for delete using (auth.uid() = user_id); $p$;
+  end if;
+end $$;
 
 -- ─── 13. Events: NO pre-seeded data ──────────────────────────────────────────
 -- Events are 100% user-generated.  No placeholder data is inserted here
