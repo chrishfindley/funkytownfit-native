@@ -274,6 +274,19 @@ export function getDailyArticle(): DailyArticle {
   return DAILY_ARTICLES[dayOfYear % DAILY_ARTICLES.length];
 }
 
+/** Returns the index of today's article in DAILY_ARTICLES. */
+export function getTodayArticleIndex(): number {
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  return dayOfYear % DAILY_ARTICLES.length;
+}
+
+/** Returns all articles — for the Habit Lab archive view. */
+export function getAllArticles(): DailyArticle[] {
+  return DAILY_ARTICLES;
+}
+
 // ── Streak coaching ───────────────────────────────────────────────────────────
 
 export interface StreakCoachingMessage {

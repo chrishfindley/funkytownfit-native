@@ -811,7 +811,7 @@ const styles = StyleSheet.create({
   locationPill: {
     alignSelf: 'flex-start',
     borderWidth: 1,
-    borderColor: colors.orangeBorder,
+    borderColor: colors.cardBorder,
     borderRadius: radius.full,
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
   selectPillActive: {
     backgroundColor: colors.orange,
     borderColor: colors.orange,
-    shadowColor: colors.orange,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.45,
     shadowRadius: 10,
@@ -915,7 +915,7 @@ const styles = StyleSheet.create({
   goalChipActive: {
     backgroundColor: colors.orange,
     borderColor: colors.orange,
-    shadowColor: colors.orange,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 10,
@@ -1133,7 +1133,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.orange,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.orange,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.45,
     shadowRadius: 16,

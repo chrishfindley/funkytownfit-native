@@ -26,6 +26,7 @@ import {
 } from '@/lib/healthkit';
 import {
   computeRecovery, RecoveryScore, getDailyIdentityMessage, getDailyArticle, DailyArticle,
+  getAllArticles, getTodayArticleIndex,
   getStreakCoachingMessage, buildWorkoutAIContext,
 } from '@/lib/coaching';
 import {
@@ -459,19 +460,12 @@ export default function DashboardScreen({ navigation }: { navigation: any }) {
           <RecoveryCard recovery={recovery} />
         )}
 
-        {/* ── Daily Habit Lab card ──────────────────────────────────────── */}
-        {!coachingDismissed && (
+        {/* ── Daily Habit Lab card — always visible, no dismiss ────────── */}
+        {(
           <>
             <HabitArticleCard
               article={dailyArticle}
               onReadMore={() => setHabitModal(true)}
-              onDismiss={async () => {
-                const today = todayStr();
-                const coaching = await getDailyCoaching(today);
-                await saveDailyCoaching({ ...coaching, coachingDismissed: true });
-                setCoachingDismissed(true);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }}
             />
             <HabitArticleModal
               article={dailyArticle}
@@ -698,12 +692,12 @@ function CalorieSplitCard({ calsIn, calsOut, targetIn, streak, protein, carbs, f
         {/* ── Calories In ── */}
         <TouchableOpacity style={calSt.col} onPress={onPressIn} activeOpacity={0.8}>
           <Text style={calSt.colLabel}>CALORIES IN</Text>
-          <Text style={[calSt.colNum, { color: ORANGE }]}>{calsIn.toLocaleString()}</Text>
+          <Text style={[calSt.colNum, { color: colors.textPrimary }]}>{calsIn.toLocaleString()}</Text>
           <Text style={calSt.colTarget}>/ {targetIn.toLocaleString()} goal</Text>
           <View style={calSt.barBg}>
             <View style={[calSt.barFill, { width: `${Math.round(pctIn * 100)}%` as any, backgroundColor: ORANGE }]} />
           </View>
-          <Text style={[calSt.pctText, { color: ORANGE }]}>{Math.round(pctIn * 100)}%</Text>
+          <Text style={[calSt.pctText, { color: colors.textMuted }]}>{Math.round(pctIn * 100)}%</Text>
 
           {/* Macro summary row */}
           <View style={calSt.macroRow}>
@@ -734,7 +728,7 @@ function CalorieSplitCard({ calsIn, calsOut, targetIn, streak, protein, carbs, f
         {/* ── Calories Out ── */}
         <TouchableOpacity style={calSt.col} onPress={onPressOut} activeOpacity={0.8}>
           <Text style={calSt.colLabel}>CALORIES OUT</Text>
-          <Text style={[calSt.colNum, { color: RED }]}>{calsOut > 0 ? calsOut.toLocaleString() : '—'}</Text>
+          <Text style={[calSt.colNum, { color: colors.textPrimary }]}>{calsOut > 0 ? calsOut.toLocaleString() : '—'}</Text>
           <Text style={calSt.colTarget}>active burn</Text>
           {calsOut > 0 && (
             <>
@@ -1007,12 +1001,12 @@ function RecoveryCard({ recovery }: { recovery: RecoveryScore }) {
   );
 }
 
-function HabitArticleCard({ article, onDismiss, onReadMore }: {
-  article: DailyArticle; onDismiss: () => void; onReadMore: () => void;
+function HabitArticleCard({ article, onReadMore }: {
+  article: DailyArticle; onReadMore: () => void;
 }) {
   return (
     <TouchableOpacity style={coachSt.card} onPress={onReadMore} activeOpacity={0.88}>
-      {/* Header row */}
+      {/* Header row — no dismiss X, users keep the card permanently */}
       <View style={coachSt.headerRow}>
         <View style={coachSt.tagWrap}>
           <View style={coachSt.tagPill}>
@@ -1020,9 +1014,7 @@ function HabitArticleCard({ article, onDismiss, onReadMore }: {
             <Text style={coachSt.tag}>HABIT LAB</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={onDismiss} hitSlop={{ top: 8, bottom: 8, left: 12, right: 12 }}>
-          <Ionicons name="close" size={16} color={colors.textMuted} />
-        </TouchableOpacity>
+        <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
       </View>
 
       {/* Article title */}
@@ -1052,43 +1044,90 @@ function HabitArticleCard({ article, onDismiss, onReadMore }: {
 function HabitArticleModal({ article, visible, onClose }: {
   article: DailyArticle; visible: boolean; onClose: () => void;
 }) {
+  type Tab = 'today' | 'archive';
+  const [tab, setTab] = useState<Tab>('today');
+  const [selected, setSelected] = useState<DailyArticle>(article);
+  const allArticles = getAllArticles();
+  const todayIdx    = getTodayArticleIndex();
+
+  function ArticleDetail({ a }: { a: DailyArticle }) {
+    return (
+      <ScrollView contentContainerStyle={hmSt.content}>
+        <View style={hmSt.badge}>
+          <Ionicons name="flask" size={13} color={ORANGE} />
+          <Text style={hmSt.badgeText}>HABIT LAB</Text>
+        </View>
+        <Text style={hmSt.title}>{a.title}</Text>
+        <Text style={hmSt.body}>{a.body}</Text>
+        <Text style={hmSt.body}>
+          {'\n'}Research consistently shows that small, deliberate habits compounded over time produce dramatically better outcomes than intense short-term bursts. Your brain builds neural pathways through repetition — neuroscientists call this long-term potentiation. Over weeks, the action shifts from effortful to automatic.{'\n\n'}
+          The key insight is implementation intentions: instead of "I will do X," say "When Y happens, I will do X." This if-then structure anchors the habit to an existing cue so you don't rely on willpower.{'\n\n'}
+          <Text style={{ color: ORANGE }}>Fort Worth tip:</Text> Stack your new habit with something you already do every day. Morning coffee → 10-min walk on Trinity Trails. Evening wind-down → 5 min mobility work.
+        </Text>
+        <Text style={hmSt.source}>— {a.source}</Text>
+        <View style={hmSt.challenge}>
+          <Text style={hmSt.challengeEmoji}>{a.challengeEmoji}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={hmSt.challengeLabel}>TODAY'S CHALLENGE</Text>
+            <Text style={hmSt.challengeText}>{a.challenge}</Text>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
   return (
     <Modal animationType="slide" presentationStyle="pageSheet" visible={visible} onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: colors.bgSecondary }}>
-        {/* Handle + close */}
+        {/* Handle + header */}
         <View style={hmSt.header}>
           <View style={hmSt.handle} />
-          <TouchableOpacity style={hmSt.closeBtn} onPress={onClose}>
-            <Ionicons name="close" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-        <ScrollView contentContainerStyle={hmSt.content}>
-          {/* Lab badge */}
-          <View style={hmSt.badge}>
-            <Ionicons name="flask" size={13} color={ORANGE} />
-            <Text style={hmSt.badgeText}>HABIT LAB</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', paddingHorizontal: 4 }}>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {(['today', 'archive'] as Tab[]).map(t => (
+                <TouchableOpacity key={t} onPress={() => setTab(t)}
+                  style={[hmSt.tabBtn, tab === t && hmSt.tabBtnActive]}>
+                  <Text style={[hmSt.tabText, tab === t && hmSt.tabTextActive]}>
+                    {t === 'today' ? "Today's Article" : 'Archive'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity onPress={onClose} style={{ padding: 4 }}>
+              <Ionicons name="close" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
           </View>
-          {/* Title */}
-          <Text style={hmSt.title}>{article.title}</Text>
-          {/* Full body */}
-          <Text style={hmSt.body}>{article.body}</Text>
-          {/* Long form — extended content generated from the summary */}
-          <Text style={hmSt.body}>
-            {'\n'}Research consistently shows that small, deliberate habits compounded over time produce dramatically better outcomes than intense short-term bursts. The science behind this: your brain builds neural pathways through repetition. Each time you perform a habit, the pathway strengthens — what neuroscientists call "long-term potentiation." Over weeks, the action shifts from effortful to automatic.{'\n\n'}
-            The key insight is implementation intentions: instead of saying "I will do X," you say "When Y happens, I will do X." This if-then structure dramatically increases follow-through by anchoring the habit to an existing cue in your environment.{'\n\n'}
-            Fort Worth tip: The best time to build a new fitness habit is to stack it with something you already do every day. Morning coffee → 10-minute walk on Trinity Trails. Evening wind-down → 5 minutes of mobility work. The location and timing cues do the heavy lifting so you don't have to rely on willpower.
-          </Text>
-          {/* Source */}
-          <Text style={hmSt.source}>— {article.source}</Text>
-          {/* Challenge */}
-          <View style={hmSt.challenge}>
-            <Text style={hmSt.challengeEmoji}>{article.challengeEmoji}</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={hmSt.challengeLabel}>TODAY'S CHALLENGE</Text>
-              <Text style={hmSt.challengeText}>{article.challenge}</Text>
+        </View>
+
+        {tab === 'today' ? (
+          <ArticleDetail a={article} />
+        ) : (
+          <View style={{ flex: 1, flexDirection: 'row' }}>
+            {/* Article list */}
+            <ScrollView style={hmSt.archiveList} contentContainerStyle={{ paddingBottom: 40 }}>
+              {allArticles.map((a, i) => (
+                <TouchableOpacity key={i}
+                  style={[hmSt.archiveRow, selected === a && hmSt.archiveRowActive]}
+                  onPress={() => setSelected(a)}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={[hmSt.archiveTitle, selected === a && { color: ORANGE }]} numberOfLines={2}>
+                      {a.title}
+                    </Text>
+                    {i === todayIdx && (
+                      <Text style={hmSt.archiveToday}>TODAY</Text>
+                    )}
+                  </View>
+                  <Text style={{ fontSize: 18 }}>{a.challengeEmoji}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            {/* Article detail */}
+            <View style={{ flex: 1, borderLeftWidth: 1, borderLeftColor: colors.cardBorder }}>
+              <ArticleDetail a={selected} />
             </View>
           </View>
-        </ScrollView>
+        )}
       </View>
     </Modal>
   );
@@ -1150,7 +1189,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: colors.cardBorder,
-    shadowColor: ORANGE,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -1219,9 +1258,9 @@ const statSt = StyleSheet.create({
     borderRadius: radius.md, padding: 14, alignItems: 'center',
     borderWidth: 1, borderColor: colors.cardBorder,
     marginBottom: spacing.sm,
-    shadowColor: ORANGE,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.08, shadowRadius: 10, elevation: 3,
+    shadowOpacity: 0.20, shadowRadius: 10, elevation: 3,
   },
   value: { fontSize: 24, fontWeight: '900', letterSpacing: -0.8 },
   unit:  { fontSize: 12, fontWeight: '700', opacity: 0.8 },
@@ -1247,8 +1286,8 @@ const hlSt = StyleSheet.create({
     alignItems: 'stretch',
     marginBottom: 10,
     overflow: 'hidden',
-    shadowColor: ORANGE, shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.08, shadowRadius: 10, elevation: 2,
+    shadowColor: '#000000', shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.20, shadowRadius: 10, elevation: 2,
   },
   metric: {
     flex: 1, alignItems: 'center', paddingVertical: spacing.md, paddingHorizontal: 4,
@@ -1275,8 +1314,8 @@ const hlSt = StyleSheet.create({
   connectCard: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     backgroundColor: CARD, borderRadius: radius.lg, borderWidth: 1,
-    borderColor: colors.orangeBorder, padding: spacing.md, marginBottom: spacing.sm,
-    shadowColor: ORANGE, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.1, shadowRadius: 10,
+    borderColor: colors.cardBorder, padding: spacing.md, marginBottom: spacing.sm,
+    shadowColor: '#000000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.1, shadowRadius: 10,
   },
   connectTitle: { fontSize: 14, fontWeight: '800', color: colors.textPrimary, marginBottom: 3 },
   connectSub:   { fontSize: 12, color: colors.textMuted, lineHeight: 17 },
@@ -1287,7 +1326,7 @@ const recSt = StyleSheet.create({
   card: {
     backgroundColor: CARD, borderRadius: radius.lg, borderWidth: 1,
     padding: spacing.lg, marginBottom: spacing.sm,
-    shadowColor: ORANGE, shadowOffset: { width: 0, height: 0 },
+    shadowColor: '#000000', shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.1, shadowRadius: 14, elevation: 4,
   },
   topRow:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 12 },
@@ -1308,12 +1347,12 @@ const calSt = StyleSheet.create({
   wrapper: {
     backgroundColor: CARD, borderRadius: radius.lg, borderWidth: 1,
     borderColor: colors.cardBorder, padding: spacing.md, marginBottom: spacing.sm,
-    shadowColor: ORANGE, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.14, shadowRadius: 18, elevation: 5,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.30, shadowRadius: 6, elevation: 4,
   },
   topRow:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   todayLabel: { fontSize: 28, fontWeight: '900', color: ORANGE, letterSpacing: -0.5, lineHeight: 32 },
-  streakChip: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: colors.orangeDim, borderWidth: 1, borderColor: colors.orangeBorder, borderRadius: radius.full, paddingHorizontal: 8, paddingVertical: 3 },
-  streakNum:  { fontSize: 11, fontWeight: '800', color: ORANGE },
+  streakChip: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: colors.cardElevated, borderWidth: 1, borderColor: colors.cardBorderBright, borderRadius: radius.full, paddingHorizontal: 8, paddingVertical: 3 },
+  streakNum:  { fontSize: 11, fontWeight: '800', color: colors.textPrimary },
   cols:       { flexDirection: 'row', gap: 0 },
   col:        { flex: 1, paddingHorizontal: 8 },
   divider:    { width: 1, backgroundColor: colors.cardBorder, marginVertical: 4 },
@@ -1334,7 +1373,7 @@ const calSt = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 9,
     alignSelf: 'stretch', justifyContent: 'center',
     marginBottom: 7,
-    shadowColor: ORANGE, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.35, shadowRadius: 6,
+    shadowColor: '#000000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.35, shadowRadius: 6,
   },
   logMealText:{ fontSize: 13, fontWeight: '900', color: colors.bg, letterSpacing: 0.2 },
   noDataNote: { fontSize: 10, color: colors.textMuted, fontStyle: 'italic', marginBottom: 8, lineHeight: 14 },
@@ -1398,12 +1437,12 @@ const cmSt = StyleSheet.create({
 const coachSt = StyleSheet.create({
   card: {
     backgroundColor: CARD, borderRadius: radius.lg, borderWidth: 1,
-    borderColor: colors.orangeBorder, padding: spacing.lg + 4, marginBottom: spacing.sm,
-    shadowColor: ORANGE, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.14, shadowRadius: 18,
+    borderColor: colors.cardBorder, padding: spacing.lg + 4, marginBottom: spacing.sm,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.30, shadowRadius: 6,
   },
   headerRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   tagWrap:     { flexDirection: 'row', alignItems: 'center' },
-  tagPill:     { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: ORANGE + '18', borderRadius: radius.full, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: ORANGE + '40' },
+  tagPill:     { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.cardElevated, borderRadius: radius.full, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: colors.cardBorderBright },
   tag:         { fontSize: 12, fontWeight: '900', color: ORANGE, letterSpacing: 1.8, textTransform: 'uppercase' },
 
   articleTitle:  { fontSize: 22, fontWeight: '900', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 10, lineHeight: 28 },
@@ -1412,7 +1451,7 @@ const coachSt = StyleSheet.create({
   readMoreRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 16 },
   readMoreText: { fontSize: 13, fontWeight: '800', color: ORANGE },
 
-  challengeRow:  { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: ORANGE + '12', borderRadius: radius.md, borderWidth: 1, borderColor: ORANGE + '30', paddingHorizontal: 14, paddingVertical: 14 },
+  challengeRow:  { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.cardElevated, borderRadius: radius.md, borderWidth: 1, borderColor: colors.cardBorderBright, paddingHorizontal: 14, paddingVertical: 14 },
   challengeEmoji: { fontSize: 28 },
   challengeLabel: { fontSize: 9, fontWeight: '800', color: ORANGE, letterSpacing: 1.8, textTransform: 'uppercase', marginBottom: 4 },
   challengeText:  { fontSize: 15, fontWeight: '700', color: colors.textPrimary, lineHeight: 20 },
@@ -1429,10 +1468,21 @@ const hmSt = StyleSheet.create({
   title:     { fontSize: 24, fontWeight: '900', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 16, lineHeight: 30 },
   body:      { fontSize: 15, color: colors.textPrimary, lineHeight: 24, marginBottom: 4 },
   source:    { fontSize: 11, color: colors.textMuted, fontStyle: 'italic', marginTop: 12, marginBottom: 20 },
-  challenge: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: ORANGE + '12', borderRadius: radius.md, borderWidth: 1, borderColor: ORANGE + '30', padding: 14 },
+  challenge: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: colors.cardElevated, borderRadius: radius.md, borderWidth: 1, borderColor: colors.cardBorderBright, padding: 14 },
   challengeEmoji: { fontSize: 28 },
   challengeLabel: { fontSize: 9, fontWeight: '900', color: ORANGE, letterSpacing: 1.8, textTransform: 'uppercase', marginBottom: 5 },
   challengeText:  { fontSize: 15, fontWeight: '700', color: colors.textPrimary, lineHeight: 22 },
+
+  // Archive tab styles
+  tabBtn:          { paddingHorizontal: 14, paddingVertical: 6, borderRadius: radius.full, borderWidth: 1, borderColor: colors.cardBorder },
+  tabBtnActive:    { backgroundColor: ORANGE, borderColor: ORANGE },
+  tabText:         { fontSize: 12, fontWeight: '700', color: colors.textMuted },
+  tabTextActive:   { color: colors.bg },
+  archiveList:     { width: 180, borderRightWidth: 1, borderRightColor: colors.cardBorder },
+  archiveRow:      { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 14, borderBottomWidth: 1, borderBottomColor: colors.cardBorder },
+  archiveRowActive:{ backgroundColor: colors.cardElevated },
+  archiveTitle:    { fontSize: 13, fontWeight: '700', color: colors.textPrimary, lineHeight: 18 },
+  archiveToday:    { fontSize: 9, fontWeight: '800', color: ORANGE, letterSpacing: 1.5, marginTop: 3 },
 });
 
 // Action cards
@@ -1443,7 +1493,7 @@ const actSt = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.cardBorder,
-    shadowColor: ORANGE,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1, shadowRadius: 10, elevation: 3,
   },

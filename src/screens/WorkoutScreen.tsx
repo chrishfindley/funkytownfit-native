@@ -466,11 +466,44 @@ export default function WorkoutScreen() {
     if (result !== 'ok') setPlayingUri(null);
   }
 
+  function cancelWorkout() {
+    Alert.alert(
+      'Cancel workout?',
+      'No sets will be saved. You can start again whenever you\'re ready.',
+      [
+        { text: 'Keep going', style: 'cancel' },
+        {
+          text: 'Cancel workout',
+          style: 'destructive',
+          onPress: () => {
+            // Clear all session state and return to schedule
+            setSessionSets({});
+            setExIdx(0);
+            setElapsedSecs(0);
+            setClockStarted(false);
+            setRestRunning(false);
+            setRestTimeLeft(90);
+            setActiveExercises([]);
+            setPhase('schedule');
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          },
+        },
+      ]
+    );
+  }
+
   async function finishWorkout() {
     if (!program) return;
     const hasAnySets = Object.values(sessionSets).some(s => s.length > 0);
     if (!hasAnySets) {
-      Alert.alert('Log a set first', 'Complete at least one set before finishing.');
+      Alert.alert(
+        'No sets logged',
+        'You haven\'t logged any sets yet.',
+        [
+          { text: 'Keep going', style: 'cancel' },
+          { text: 'Cancel workout', style: 'destructive', onPress: cancelWorkout },
+        ]
+      );
       return;
     }
     setSaving(true);
@@ -948,6 +981,10 @@ export default function WorkoutScreen() {
     <View style={{ flex: 1, backgroundColor: BG }}>
       {/* ── Top bar ───────────────────────────────────────────────────────── */}
       <View style={[activeSt.topBar, { paddingTop: insets.top + 4 }]}>
+        {/* Cancel button — always visible, never accidentally triggered (confirm dialog) */}
+        <TouchableOpacity onPress={cancelWorkout} style={activeSt.cancelBtn}>
+          <Ionicons name="close" size={20} color={colors.textMuted} />
+        </TouchableOpacity>
         <View style={{ flex: 1 }}>
           <Text style={activeSt.programLabel}>{program.emoji} {program.label}</Text>
           <Text style={activeSt.elapsed}>
@@ -1314,7 +1351,7 @@ const asSt = StyleSheet.create({
     backgroundColor: CARD, borderRadius: 14, padding: 14, marginBottom: 12,
     borderWidth: 1.5, borderColor: '#3B82F6' + '55',
     shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.18, shadowRadius: 10, elevation: 4,
+    shadowOpacity: 0.30, shadowRadius: 10, elevation: 4,
   },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 8 },
   title:       { fontSize: 16, fontWeight: '800', color: colors.textPrimary },
@@ -1469,8 +1506,15 @@ const doneSt = StyleSheet.create({
 const activeSt = StyleSheet.create({
   topBar: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    gap: 8,
     paddingHorizontal: spacing.md, paddingBottom: 8,
     borderBottomWidth: 1, borderColor: colors.cardBorder,
+  },
+  cancelBtn: {
+    width: 34, height: 34, borderRadius: 17,
+    backgroundColor: colors.cardElevated,
+    borderWidth: 1, borderColor: colors.cardBorder,
+    alignItems: 'center', justifyContent: 'center',
   },
   programLabel: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
   elapsed:      { fontSize: 13, color: colors.textMuted, marginTop: 2 },

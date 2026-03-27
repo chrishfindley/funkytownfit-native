@@ -44,11 +44,12 @@ export default {
     ],
     scheme: 'funkytownfit',
     extra: {
-      supabaseUrl:        process.env.SUPABASE_URL,
-      supabaseAnonKey:    process.env.SUPABASE_ANON_KEY,
-      googlePlacesApiKey: process.env.GOOGLE_PLACES_API_KEY,
-      spotifyClientId:    process.env.SPOTIFY_CLIENT_ID,
-      anthropicApiKey:    process.env.ANTHROPIC_API_KEY,
+      supabaseUrl:          process.env.SUPABASE_URL,
+      supabaseAnonKey:      process.env.SUPABASE_ANON_KEY,
+      googlePlacesApiKey:   process.env.GOOGLE_PLACES_API_KEY,
+      spotifyClientId:      process.env.SPOTIFY_CLIENT_ID,
+      anthropicApiKey:      process.env.ANTHROPIC_API_KEY,
+      eventbriteToken:      process.env.EVENTBRITE_TOKEN,
     },
   },
 };

@@ -15,11 +15,13 @@ import {
 } from '@/lib/storage';
 import { UserProfile } from '@/lib/types';
 import { getSession, signOut } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 import {
   isTrainerMode, enableTrainerMode, disableTrainerMode,
   getOrCreateInviteCode, acceptInvite, getMyTrainer,
   TrainerRelationship,
 } from '@/lib/trainer';
+import LegalScreen, { LegalDoc } from './LegalScreen';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -49,6 +51,10 @@ export default function ProfileScreen() {
   const [inviteInput,       setInviteInput]       = useState('');
   const [connectLoading,    setConnectLoading]    = useState(false);
   const [userId,            setUserId]            = useState<string | null>(null);
+
+  // Legal modals
+  const [legalDoc,          setLegalDoc]          = useState<LegalDoc | null>(null);
+  const [deletingAccount,   setDeletingAccount]   = useState(false);
 
   async function loadData() {
     const session = await getSession();
@@ -494,7 +500,7 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* App Info */}
+        {/* App Info + Legal */}
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>App Info</Text>
           <View style={styles.infoRow}>
@@ -505,6 +511,30 @@ export default function ProfileScreen() {
             <Text style={styles.infoLabel}>Build</Text>
             <Text style={styles.infoValue}>1</Text>
           </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Location</Text>
+            <Text style={styles.infoValue}>Fort Worth, TX</Text>
+          </View>
+        </View>
+
+        {/* Legal Links */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Legal</Text>
+          {([
+            { key: 'privacy', label: 'Privacy Policy',     icon: 'shield-outline' as const },
+            { key: 'terms',   label: 'Terms of Service',   icon: 'document-text-outline' as const },
+            { key: 'health',  label: 'Health Disclaimer',  icon: 'medical-outline' as const },
+          ] as { key: LegalDoc; label: string; icon: React.ComponentProps<typeof Ionicons>['name'] }[]).map(item => (
+            <TouchableOpacity
+              key={item.key}
+              style={styles.legalRow}
+              onPress={() => setLegalDoc(item.key)}
+            >
+              <Ionicons name={item.icon} size={16} color={colors.textMuted} />
+              <Text style={styles.legalRowText}>{item.label}</Text>
+              <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Sign Out */}
@@ -539,14 +569,14 @@ export default function ProfileScreen() {
             onPress={() => {
               Alert.alert(
                 'Clear All Data',
-                'This will delete all your workouts, food logs, and progress. This cannot be undone.',
+                'This will delete all your workouts, food logs, and progress from this device. This cannot be undone.',
                 [
                   { text: 'Cancel' },
                   {
                     text: 'Clear All',
                     onPress: async () => {
                       await AsyncStorage.clear();
-                      Alert.alert('Data Cleared', 'All your data has been deleted.');
+                      Alert.alert('Data Cleared', 'All local data has been deleted.');
                     },
                     style: 'destructive',
                   },
@@ -555,10 +585,86 @@ export default function ProfileScreen() {
             }}
             style={styles.dangerButton}
           >
-            <Text style={styles.dangerButtonText}>Clear All Data</Text>
+            <Text style={styles.dangerButtonText}>Clear All Local Data</Text>
+          </TouchableOpacity>
+
+          {/* Delete Account — App Store required */}
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                'Delete Account',
+                'This will permanently delete your Funkytown Fit account and all associated data. This cannot be undone.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Delete My Account',
+                    style: 'destructive',
+                    onPress: () => {
+                      Alert.alert(
+                        'Are you absolutely sure?',
+                        'Your account, workout history, food logs, and all personal data will be permanently deleted.',
+                        [
+                          { text: 'Keep Account', style: 'cancel' },
+                          {
+                            text: 'Yes, Delete Everything',
+                            style: 'destructive',
+                            onPress: async () => {
+                              setDeletingAccount(true);
+                              try {
+                                // Delete user data from Supabase tables
+                                const session = await getSession();
+                                if (session?.id) {
+                                  const uid = session.id;
+                                  await Promise.allSettled([
+                                    supabase.from('profiles').delete().eq('id', uid),
+                                    supabase.from('food_logs').delete().eq('user_id', uid),
+                                    supabase.from('workout_logs').delete().eq('user_id', uid),
+                                    supabase.from('weight_logs').delete().eq('user_id', uid),
+                                    supabase.from('community_posts').delete().eq('user_id', uid),
+                                    supabase.from('event_rsvps').delete().eq('user_id', uid),
+                                    supabase.from('post_likes').delete().eq('user_id', uid),
+                                  ]);
+                                }
+                                // Clear local storage
+                                await AsyncStorage.clear();
+                                // Sign out (Supabase account itself is deactivated server-side)
+                                await signOut();
+                                // Show final confirmation — auth listener will redirect to login
+                                Alert.alert(
+                                  'Account Deleted',
+                                  'Your account and all data have been permanently deleted. We\'re sorry to see you go.'
+                                );
+                              } catch {
+                                Alert.alert('Error', 'Something went wrong. Please contact support@funkytownfit.com to complete account deletion.');
+                              } finally {
+                                setDeletingAccount(false);
+                              }
+                            },
+                          },
+                        ]
+                      );
+                    },
+                  },
+                ]
+              );
+            }}
+            style={[styles.dangerButton, { borderColor: colors.red + '55', marginTop: spacing.sm }]}
+            disabled={deletingAccount}
+          >
+            {deletingAccount
+              ? <ActivityIndicator size="small" color={colors.red} />
+              : <Text style={[styles.dangerButtonText, { color: colors.red }]}>Delete Account</Text>
+            }
           </TouchableOpacity>
         </View>
+
       </ScrollView>
+
+      {/* Legal modals */}
+      {legalDoc && (
+        <LegalScreen doc={legalDoc} onClose={() => setLegalDoc(null)} />
+      )}
+
     </View>
   );
 }
@@ -636,7 +742,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.20,
     shadowRadius: 6,
     elevation: 2,
   },
@@ -704,7 +810,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.20,
     shadowRadius: 6,
     elevation: 2,
   },
@@ -852,7 +958,7 @@ const styles = StyleSheet.create({
   },
   trainerCodeBox: {
     backgroundColor: colors.bgSecondary, borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.orangeBorder,
+    borderWidth: 1, borderColor: colors.cardBorder,
     padding: spacing.md, marginTop: spacing.md, alignItems: 'center',
   },
   trainerCodeLabel: {
@@ -865,7 +971,7 @@ const styles = StyleSheet.create({
   trainerCodeChar: {
     width: 36, height: 44, borderRadius: radius.sm,
     backgroundColor: colors.card, borderWidth: 1.5,
-    borderColor: colors.orangeBorder,
+    borderColor: colors.cardBorder,
     alignItems: 'center', justifyContent: 'center',
   },
   trainerCodeCharText: {
@@ -886,7 +992,7 @@ const styles = StyleSheet.create({
   trainerAvatarSmall: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: colors.orangeDim, borderWidth: 1,
-    borderColor: colors.orangeBorder,
+    borderColor: colors.cardBorder,
     alignItems: 'center', justifyContent: 'center',
   },
   connectRow: {
@@ -910,13 +1016,36 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   dangerButton: {
-    backgroundColor: colors.red,
+    backgroundColor: 'rgba(239,68,68,0.12)',
     borderRadius: radius.md,
-    paddingVertical: spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(239,68,68,0.3)',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
   },
   dangerButtonText: {
-    ...typography.button,
-    color: 'white',
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.red,
+  },
+
+  // ── Legal ───────────────────────────────────────────────────────────────────
+  legalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.cardBorder,
+  },
+  legalRowText: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
   },
 });

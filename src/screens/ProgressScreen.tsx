@@ -138,12 +138,6 @@ function WeightChart({ entries, width, height }: {
 
   const pts = vals.map((v, i) => ({ x: toX(i), y: toY(v) }));
 
-  // 7-day rolling average
-  const avgPts = vals.map((_, i) => {
-    const sl = vals.slice(Math.max(0, i - 6), i + 1);
-    return { x: toX(i), y: toY(sl.reduce((s, v) => s + v, 0) / sl.length) };
-  });
-
   const last = pts[pts.length - 1];
 
   // 4 evenly-spaced y-axis ticks
@@ -182,12 +176,6 @@ function WeightChart({ entries, width, height }: {
           </React.Fragment>
         );
       })}
-
-      {/* ── Rolling-average trend line (lighter, thinner) ──── */}
-      {avgPts.slice(0, -1).map((p, i) => (
-        <Seg key={`a${i}`} x1={p.x} y1={p.y} x2={avgPts[i+1].x} y2={avgPts[i+1].y}
-          color={colors.orangeLight + '55'} thick={1.5} />
-      ))}
 
       {/* ── Main weight line ───────────────────────────────── */}
       {pts.slice(0, -1).map((p, i) => (
@@ -242,7 +230,7 @@ function WeightChart({ entries, width, height }: {
         position: 'absolute', left: last.x - 6, top: last.y - 6,
         width: 12, height: 12, borderRadius: 6,
         backgroundColor: ORANGE, borderWidth: 2.5, borderColor: colors.card,
-        shadowColor: ORANGE, shadowOffset: { width: 0, height: 0 },
+        shadowColor: '#000000', shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.7, shadowRadius: 8,
       }} />
 
@@ -798,7 +786,7 @@ const st = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: colors.orangeDim,
     borderRadius: radius.full, paddingHorizontal: 14, paddingVertical: 8,
-    borderWidth: 1, borderColor: colors.orangeBorder,
+    borderWidth: 1, borderColor: colors.cardBorder,
   },
   headerBtnText: { fontSize: 13, fontWeight: '700', color: ORANGE },
 
@@ -820,9 +808,9 @@ const st = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.cardBorder,
     padding: C_PAD,
-    shadowColor: ORANGE,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.20,
     shadowRadius: 14,
     elevation: 4,
   },
@@ -946,7 +934,7 @@ const st = StyleSheet.create({
     backgroundColor: ORANGE, borderRadius: radius.lg,
     paddingVertical: 18,
     alignItems: 'center',
-    shadowColor: ORANGE, shadowOffset: { width: 0, height: 0 },
+    shadowColor: '#000000', shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.45, shadowRadius: 14,
   },
   modalBtnText:    { fontSize: 17, fontWeight: '800', color: '#fff', letterSpacing: 0.3 },

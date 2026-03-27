@@ -1097,7 +1097,7 @@ const styles = StyleSheet.create({
   goBtn: {
     backgroundColor: ORANGE, borderRadius: radius.full,
     paddingHorizontal: 52, paddingVertical: 18,
-    shadowColor: ORANGE, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 6,
+    shadowColor: '#000000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 6,
     marginBottom: 10,
   },
   goBtnText: { fontSize: 22, fontWeight: '900', color: '#fff', letterSpacing: 0.5 },

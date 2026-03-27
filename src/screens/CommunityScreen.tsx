@@ -28,6 +28,7 @@ import {
   Conversation, Message,
 } from '@/lib/messaging';
 import { getSession } from '@/lib/auth';
+import { fetchFortWorthEvents } from '@/lib/events';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -214,7 +215,7 @@ const pc = StyleSheet.create({
   avatar: {
     width: 38, height: 38, borderRadius: 19,
     backgroundColor: colors.orangeDim,
-    borderWidth: 1.5, borderColor: colors.orangeBorder,
+    borderWidth: 1.5, borderColor: colors.cardBorder,
     alignItems: 'center', justifyContent: 'center',
   },
   avatarText: { fontSize: 16, fontWeight: '900', color: colors.orange },
@@ -233,7 +234,7 @@ const pc = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: colors.orangeDim, borderRadius: radius.full,
     paddingHorizontal: 10, paddingVertical: 5, alignSelf: 'flex-start',
-    borderWidth: 1, borderColor: colors.orangeBorder, marginBottom: 10,
+    borderWidth: 1, borderColor: colors.cardBorder, marginBottom: 10,
   },
   placeChipText: { fontSize: 12, fontWeight: '700', color: colors.orange },
   playlistChip: {
@@ -335,8 +336,8 @@ const ec = StyleSheet.create({
     padding: spacing.md,
   },
   cardFeatured: {
-    borderColor: colors.orangeBorder,
-    shadowColor: colors.orange,
+    borderColor: colors.cardBorder,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
@@ -825,9 +826,10 @@ export default function CommunityScreen() {
     const uid = session?.id ?? null;
     setMyUserId(uid);
 
-    const [feedPosts, upcomingEvents, pending, unread] = await Promise.all([
+    const [feedPosts, adminEvents, liveEvents, pending, unread] = await Promise.all([
       getFriendsFeed(30),
       getUpcomingEvents(20),
+      fetchFortWorthEvents(30),
       uid ? getPendingFriendRequests() : Promise.resolve([]),
       getTotalUnread(),
     ]);
@@ -837,8 +839,20 @@ export default function CommunityScreen() {
       setFriends(fl);
     }
 
+    // Merge live Eventbrite events with any admin-curated events from Supabase.
+    // De-duplicate by title+date in case an admin also added a known event.
+    const seen = new Set<string>();
+    const merged = [...adminEvents, ...liveEvents].filter(ev => {
+      const key = `${ev.title.toLowerCase()}|${ev.eventDate}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    // Sort chronologically
+    merged.sort((a, b) => a.eventDate.localeCompare(b.eventDate));
+
     setPosts(feedPosts);
-    setEvents(upcomingEvents);
+    setEvents(merged);
     setPendingReqs(pending);
     setUnreadCount(unread);
     setLoading(false);
@@ -1047,9 +1061,9 @@ export default function CommunityScreen() {
                 {filteredEvents.length === 0 ? (
                   <View style={s.emptyState}>
                     <Text style={{ fontSize: 48 }}>📅</Text>
-                    <Text style={s.emptyTitle}>No events yet</Text>
+                    <Text style={s.emptyTitle}>No upcoming events</Text>
                     <Text style={s.emptySub}>
-                      Events here are posted by community members — not auto-generated. Know of something happening in Fort Worth? Post it!
+                      Live Fort Worth events are pulled directly from Eventbrite. Nothing's showing up right now — check back soon or add your own.
                     </Text>
                     <TouchableOpacity style={s.emptyBtn} onPress={() => Alert.alert('Coming Soon', 'Event creation is coming in the next update!')}>
                       <Ionicons name="add-circle" size={16} color={colors.bg} />

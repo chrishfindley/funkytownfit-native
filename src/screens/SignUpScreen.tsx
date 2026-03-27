@@ -193,7 +193,9 @@ export default function SignUpScreen({ onSignUpSuccess, onGoToLogin }: Props) {
           </TouchableOpacity>
 
           <Text style={styles.legalText}>
-            By creating an account you agree to use this app responsibly and not share your login details.
+            By creating an account you agree to our Terms of Service and Privacy Policy.
+            Funkytown Fit is for general wellness only — not medical advice.
+            Always consult a doctor before starting a new fitness or diet program.
           </Text>
         </View>
 
@@ -225,7 +227,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1, borderColor: colors.cardBorder,
     padding: spacing.xl,
-    shadowColor: colors.orange,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.07, shadowRadius: 16,
   },
@@ -253,7 +255,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.orange,
     borderRadius: radius.lg, paddingVertical: 16,
     alignItems: 'center', marginTop: spacing.sm,
-    shadowColor: colors.orange, shadowOffset: { width: 0, height: 0 },
+    shadowColor: '#000000', shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4, shadowRadius: 14,
   },
   submitBtnText: { fontSize: 16, fontWeight: '800', color: '#fff', letterSpacing: 0.4 },

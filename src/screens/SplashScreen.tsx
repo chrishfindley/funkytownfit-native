@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import LonghornSilhouette from '../components/LonghornSilhouette';
 
 // ── Design tokens (standalone — no theme import so splash renders before theme loads)
 const BG     = '#0A0806';
@@ -64,9 +65,8 @@ export default function SplashScreen({ onComplete }: Props) {
       </View>
 
       {/* ── Steer + location ──────────────────────────────────────────────── */}
-      {/* Replace 🐂 with a custom SVG longhorn steer when asset is ready    */}
       <Animated.View style={[styles.footer, { opacity: iconO, transform: [{ translateY: iconY }] }]}>
-        <Text style={styles.steer}>🐂</Text>
+        <LonghornSilhouette size={90} color={WHITE} bgColor={BG} />
         <View style={styles.locationRow}>
           <View style={styles.locationLine} />
           <Text style={styles.location}>FORT WORTH, TX</Text>
@@ -122,9 +122,6 @@ const styles = StyleSheet.create({
     bottom: 88,
     alignItems: 'center',
     gap: 10,
-  },
-  steer: {
-    fontSize: 48,
   },
   locationRow: {
     flexDirection: 'row',
