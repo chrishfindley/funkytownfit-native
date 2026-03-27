@@ -34,38 +34,57 @@ create table if not exists assigned_workouts (
 -- ─── 3. RLS: trainer_client_relationships ────────────────────
 alter table trainer_client_relationships enable row level security;
 
--- Trainer and client can see their own relationships.
--- Any authenticated user can see PENDING rows with no client yet (to accept by code).
-create policy "tcr_select" on trainer_client_relationships
-  for select using (
-    auth.uid() = trainer_id
-    or auth.uid() = client_id
-    or (status = 'pending' and client_id is null)
-  );
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='trainer_client_relationships' and policyname='tcr_select') then
+    execute $p$ create policy "tcr_select" on trainer_client_relationships
+      for select using (
+        auth.uid() = trainer_id
+        or auth.uid() = client_id
+        or (status = 'pending' and client_id is null)
+      ); $p$;
+  end if;
+end $$;
 
--- Only the trainer can create an invite
-create policy "tcr_insert" on trainer_client_relationships
-  for insert with check (auth.uid() = trainer_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='trainer_client_relationships' and policyname='tcr_insert') then
+    execute $p$ create policy "tcr_insert" on trainer_client_relationships
+      for insert with check (auth.uid() = trainer_id); $p$;
+  end if;
+end $$;
 
--- Trainer can update anything in their rows.
--- Any authenticated user can accept a pending invite (sets client_id).
-create policy "tcr_update" on trainer_client_relationships
-  for update using (
-    auth.uid() = trainer_id
-    or (status = 'pending' and client_id is null)
-  );
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='trainer_client_relationships' and policyname='tcr_update') then
+    execute $p$ create policy "tcr_update" on trainer_client_relationships
+      for update using (
+        auth.uid() = trainer_id
+        or (status = 'pending' and client_id is null)
+      ); $p$;
+  end if;
+end $$;
 
 -- ─── 4. RLS: assigned_workouts ───────────────────────────────
 alter table assigned_workouts enable row level security;
 
-create policy "aw_select" on assigned_workouts
-  for select using (auth.uid() = trainer_id or auth.uid() = client_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='assigned_workouts' and policyname='aw_select') then
+    execute $p$ create policy "aw_select" on assigned_workouts
+      for select using (auth.uid() = trainer_id or auth.uid() = client_id); $p$;
+  end if;
+end $$;
 
-create policy "aw_insert" on assigned_workouts
-  for insert with check (auth.uid() = trainer_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='assigned_workouts' and policyname='aw_insert') then
+    execute $p$ create policy "aw_insert" on assigned_workouts
+      for insert with check (auth.uid() = trainer_id); $p$;
+  end if;
+end $$;
 
-create policy "aw_update" on assigned_workouts
-  for update using (auth.uid() = trainer_id or auth.uid() = client_id);
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename='assigned_workouts' and policyname='aw_update') then
+    execute $p$ create policy "aw_update" on assigned_workouts
+      for update using (auth.uid() = trainer_id or auth.uid() = client_id); $p$;
+  end if;
+end $$;
 
 -- ─── 5. Allow trainers to read clients' data ─────────────────
 -- NOTE: If these tables already have a "user can read own rows" policy,
