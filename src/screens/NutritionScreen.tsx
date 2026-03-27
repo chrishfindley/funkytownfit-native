@@ -1864,9 +1864,9 @@ const styles = StyleSheet.create({
   },
   disclaimerStrip: {
     marginHorizontal: spacing.lg, marginTop: spacing.sm,
-    backgroundColor: '#3a2a00',
+    backgroundColor: '#1A1A1A',
     borderRadius: radius.sm, paddingHorizontal: spacing.md, paddingVertical: 6,
-    borderWidth: 1, borderColor: '#6b4800',
+    borderWidth: 1, borderColor: '#2E2E2E',
   },
   disclaimerStripText: { fontSize: 11, color: '#FFB74D', fontWeight: '600' },
   restCount: {
@@ -1903,9 +1903,9 @@ const styles = StyleSheet.create({
   restaurantDetailSub:  { fontSize: 11, color: colors.textSecondary },
 
   restaurantDisclaimer: {
-    backgroundColor: '#1e1a0a', borderRadius: radius.sm,
+    backgroundColor: '#141414', borderRadius: radius.sm,
     padding: spacing.sm, marginBottom: 12,
-    borderWidth: 1, borderColor: '#6b4800',
+    borderWidth: 1, borderColor: '#2E2E2E',
   },
   restaurantDisclaimerText: { fontSize: 11, color: '#FFB74D', lineHeight: 16 },
 

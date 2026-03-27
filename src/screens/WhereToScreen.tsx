@@ -105,7 +105,7 @@ function buildLeafletHtml(lat: number, lng: number, name: string, color: string)
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #0A0806; }
+    body { background: #0C0C0C; }
     #map { width: 100%; height: 100vh; }
     .custom-icon {
       background: #${markerColor};
@@ -502,7 +502,7 @@ const ss = StyleSheet.create({
   // Splash
   splash: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#0B0E12',
+    backgroundColor: '#0C0C0C',
     zIndex: 999,
     alignItems: 'center',
     justifyContent: 'center',

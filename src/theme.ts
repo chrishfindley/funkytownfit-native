@@ -1,33 +1,33 @@
 // Funkytown Fit — Design System
-// Sand Supply Co. aesthetic: warm near-black · crisp white · Texas fire orange
-// White is the primary text color. Orange is the single accent. No blue undertones.
+// Sand Supply Co. aesthetic: PURE neutral black · bright white · Texas fire orange
+// Rule: bg is true neutral black (no warm/brown cast). Orange accent only. White = all content.
 
 export const colors = {
-  // ── Backgrounds ────────────────────────────────────────────────────────────
-  bg:               '#0A0806',   // warm deep black — the foundation
-  bgSecondary:      '#0F0D0A',   // slightly elevated (headers, modals)
-  card:             '#161210',   // card surface
-  cardElevated:     '#1E1A16',   // raised / focused card
-  cardBorder:       '#2C2520',   // subtle warm border
-  cardBorderBright: '#3C3530',   // active / hover border
+  // ── Backgrounds — pure neutral, zero warm undertone ─────────────────────────
+  bg:               '#0C0C0C',   // true near-black — no brown, no blue, no warm cast
+  bgSecondary:      '#101010',   // slightly raised (headers, sheets)
+  card:             '#141414',   // card surface — almost same as bg, just barely lifted
+  cardElevated:     '#1A1A1A',   // raised / focused state
+  cardBorder:       '#222222',   // neutral grey outline — clean and crisp
+  cardBorderBright: '#2E2E2E',   // active / hover border
 
-  // ── Brand accent ───────────────────────────────────────────────────────────
-  orange:        '#F97316',   // THE accent — use sparingly
-  orangeLight:   '#FB9A4B',   // lighter for gradients
+  // ── Brand accent — use sparingly ─────────────────────────────────────────────
+  orange:        '#F97316',   // THE one accent color
+  orangeLight:   '#FB9A4B',   // lighter variant for gradients/chips
   orangeDim:     'rgba(249,115,22,0.10)',
   orangeBorder:  'rgba(249,115,22,0.22)',
-  orangeGlow:    'rgba(249,115,22,0.14)',
+  orangeGlow:    'rgba(249,115,22,0.12)',
   amber:         '#D4821A',
   gold:          '#C9981F',
   rust:          '#B85C1A',
 
-  // ── Text ───────────────────────────────────────────────────────────────────
-  textPrimary:   '#FFFFFF',   // crisp white — Sand Supply Co. style
-  textSecondary: '#9E968C',   // warm gray secondary
-  textMuted:     '#564E46',   // warm muted labels / placeholders
-  textInverse:   '#0A0806',   // text on orange buttons
+  // ── Text — high contrast ──────────────────────────────────────────────────────
+  textPrimary:   '#FFFFFF',   // pure bright white — maximum contrast
+  textSecondary: '#8A8A8A',   // neutral mid-grey (no warm undertone)
+  textMuted:     '#484848',   // dark grey for labels / placeholders
+  textInverse:   '#0C0C0C',   // text on orange CTA buttons
 
-  // ── Utility ────────────────────────────────────────────────────────────────
+  // ── Utility / semantic ────────────────────────────────────────────────────────
   green:         '#22C55E',
   greenDim:      'rgba(34,197,94,0.12)',
   greenBorder:   'rgba(34,197,94,0.22)',
@@ -37,10 +37,10 @@ export const colors = {
   blueDim:       'rgba(59,130,246,0.12)',
   spotify:       '#1DB954',
 
-  // ── Shadows ────────────────────────────────────────────────────────────────
+  // ── Shadows ───────────────────────────────────────────────────────────────────
   shadow:        '#000000',
 
-  // ── Macro category colors (functional — keep distinct) ─────────────────────
+  // ── Macro category colors (functional — keep visually distinct) ───────────────
   calorie:  '#F97316',   // orange
   protein:  '#3B82F6',   // blue
   carbs:    '#22C55E',   // green
@@ -68,7 +68,7 @@ export const typography = {
   button:    { fontSize: 16, fontWeight: '800' as const, letterSpacing: 0.3 as const },
 };
 
-// Standard card — clean dark surface, black shadow (no orange glow on every card)
+// Standard card — same near-black as the bg, only a subtle grey border distinguishes it
 export const cardStyle = {
   backgroundColor: colors.card,
   borderRadius:    radius.lg,
@@ -76,22 +76,20 @@ export const cardStyle = {
   borderColor:     colors.cardBorder,
   padding:         spacing.lg,
   shadowColor:     '#000000',
-  shadowOffset:    { width: 0, height: 2 },
-  shadowOpacity:   0.35,
-  shadowRadius:    8,
-  elevation:       4,
+  shadowOffset:    { width: 0, height: 1 },
+  shadowOpacity:   0.25,
+  shadowRadius:    6,
+  elevation:       3,
 };
 
-// Hero card — orange glow reserved for the most important card on screen
+// Hero card — the single most important card on a screen (orange border only, no glow)
 export const heroCardStyle = {
   ...cardStyle,
   borderColor:   colors.orangeBorder,
-  shadowColor:   colors.orange,
-  shadowOpacity: 0.10,
-  shadowRadius:  16,
+  shadowOpacity: 0.08,
 };
 
-// Accent section label — left orange bar + spaced caps
+// Accent section label — spaced caps, muted grey
 export const sectionLabel = {
   fontSize: 11,
   fontWeight: '700' as const,

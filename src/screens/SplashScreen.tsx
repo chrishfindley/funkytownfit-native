@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import LonghornSilhouette from '../components/LonghornSilhouette';
 
 // ── Design tokens (standalone — no theme import so splash renders before theme loads)
-const BG     = '#0A0806';
+const BG     = '#0C0C0C';
 const WHITE  = '#FFFFFF';
 const ORANGE = '#F97316';
 

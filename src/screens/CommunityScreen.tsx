@@ -18,7 +18,7 @@ import { colors, spacing, radius, typography } from '@/theme';
 import {
   CommunityPost, CommunityEvent, PostType, EventType, Friendship,
   getFriendsFeed, createPost, likePost, unlikePost, deletePost,
-  getUpcomingEvents, rsvpToEvent, unrsvpFromEvent,
+  rsvpToEvent, unrsvpFromEvent,
   getFriends, getPendingFriendRequests, acceptFriendRequest, declineFriendRequest,
   sendFitPartnerRequest, getFitPartnershipStatus, FitPartnership,
 } from '@/lib/community';
@@ -826,9 +826,8 @@ export default function CommunityScreen() {
     const uid = session?.id ?? null;
     setMyUserId(uid);
 
-    const [feedPosts, adminEvents, liveEvents, pending, unread] = await Promise.all([
+    const [feedPosts, liveEvents, pending, unread] = await Promise.all([
       getFriendsFeed(30),
-      getUpcomingEvents(20),
       fetchFortWorthEvents(30),
       uid ? getPendingFriendRequests() : Promise.resolve([]),
       getTotalUnread(),
@@ -839,20 +838,14 @@ export default function CommunityScreen() {
       setFriends(fl);
     }
 
-    // Merge live Eventbrite events with any admin-curated events from Supabase.
-    // De-duplicate by title+date in case an admin also added a known event.
-    const seen = new Set<string>();
-    const merged = [...adminEvents, ...liveEvents].filter(ev => {
-      const key = `${ev.title.toLowerCase()}|${ev.eventDate}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-    // Sort chronologically
-    merged.sort((a, b) => a.eventDate.localeCompare(b.eventDate));
+    // Events source: Eventbrite ONLY.
+    // The Supabase community_events table is no longer used for the events tab
+    // to ensure zero fake events can appear. Add your Eventbrite token to .env
+    // to see real live Fort Worth events. Events are sorted chronologically.
+    liveEvents.sort((a, b) => a.eventDate.localeCompare(b.eventDate));
 
     setPosts(feedPosts);
-    setEvents(merged);
+    setEvents(liveEvents);
     setPendingReqs(pending);
     setUnreadCount(unread);
     setLoading(false);

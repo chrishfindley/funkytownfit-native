@@ -15,7 +15,7 @@ interface Props {
 export default function LonghornSilhouette({
   size    = 160,
   color   = '#FFFFFF',
-  bgColor = '#0A0806',
+  bgColor = '#0C0C0C',
 }: Props) {
   // All coordinates designed for a 220×160 viewBox
   const vw = 220;

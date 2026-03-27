@@ -1585,7 +1585,7 @@ const activeSt = StyleSheet.create({
   prTxt:  { color: '#fff', fontWeight: '800', fontSize: 18 },
   toast: {
     position: 'absolute', bottom: 130, left: 20, right: 20,
-    backgroundColor: '#1F2937', borderRadius: 10,
+    backgroundColor: '#1A1A1A', borderRadius: 10,
     padding: 12, alignItems: 'center',
   },
   toastTxt: { color: '#fff', fontWeight: '600', fontSize: 14 },
