@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...typography.h1,
-    color: colors.orange,
+    color: colors.textPrimary,
     marginBottom: spacing.sm,
   },
   headerSub: {
@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   input: {
-    backgroundColor: 'rgba(249,115,22,0.04)',
+    backgroundColor: colors.cardElevated,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.cardBorder,
@@ -871,7 +871,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     ...typography.h2,
-    color: colors.orange,
+    color: colors.textPrimary,
   },
 
   goalsRow: {
@@ -880,12 +880,12 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   goalPill: {
-    backgroundColor: 'rgba(249,115,22,0.1)',
+    backgroundColor: colors.cardElevated,
     borderRadius: radius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1,
-    borderColor: 'rgba(249,115,22,0.2)',
+    borderColor: colors.cardBorder,
   },
   goalPillText: {
     ...typography.bodySm,

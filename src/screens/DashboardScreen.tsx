@@ -1443,7 +1443,7 @@ const coachSt = StyleSheet.create({
   headerRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   tagWrap:     { flexDirection: 'row', alignItems: 'center' },
   tagPill:     { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.cardElevated, borderRadius: radius.full, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: colors.cardBorderBright },
-  tag:         { fontSize: 12, fontWeight: '900', color: ORANGE, letterSpacing: 1.8, textTransform: 'uppercase' },
+  tag:         { fontSize: 12, fontWeight: '900', color: '#8A8A8A', letterSpacing: 1.8, textTransform: 'uppercase' },
 
   articleTitle:  { fontSize: 22, fontWeight: '900', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 10, lineHeight: 28 },
   articleTeaser: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 12 },
@@ -1453,7 +1453,7 @@ const coachSt = StyleSheet.create({
 
   challengeRow:  { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.cardElevated, borderRadius: radius.md, borderWidth: 1, borderColor: colors.cardBorderBright, paddingHorizontal: 14, paddingVertical: 14 },
   challengeEmoji: { fontSize: 28 },
-  challengeLabel: { fontSize: 9, fontWeight: '800', color: ORANGE, letterSpacing: 1.8, textTransform: 'uppercase', marginBottom: 4 },
+  challengeLabel: { fontSize: 9, fontWeight: '800', color: '#8A8A8A', letterSpacing: 1.8, textTransform: 'uppercase', marginBottom: 4 },
   challengeText:  { fontSize: 15, fontWeight: '700', color: colors.textPrimary, lineHeight: 20 },
 });
 
@@ -1463,26 +1463,26 @@ const hmSt = StyleSheet.create({
   handle:    { width: 36, height: 4, borderRadius: 2, backgroundColor: colors.cardBorder, marginBottom: 10 },
   closeBtn:  { alignSelf: 'flex-end', padding: 4 },
   content:   { padding: spacing.lg, paddingBottom: 60 },
-  badge:     { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: ORANGE + '18', borderRadius: radius.full, paddingHorizontal: 12, paddingVertical: 5, alignSelf: 'flex-start', borderWidth: 1, borderColor: ORANGE + '40', marginBottom: 14 },
-  badgeText: { fontSize: 11, fontWeight: '900', color: ORANGE, letterSpacing: 1.8, textTransform: 'uppercase' },
+  badge:     { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.cardElevated, borderRadius: radius.full, paddingHorizontal: 12, paddingVertical: 5, alignSelf: 'flex-start', borderWidth: 1, borderColor: colors.cardBorderBright, marginBottom: 14 },
+  badgeText: { fontSize: 11, fontWeight: '700', color: '#8A8A8A', letterSpacing: 1.8, textTransform: 'uppercase' },
   title:     { fontSize: 24, fontWeight: '900', color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 16, lineHeight: 30 },
   body:      { fontSize: 15, color: colors.textPrimary, lineHeight: 24, marginBottom: 4 },
   source:    { fontSize: 11, color: colors.textMuted, fontStyle: 'italic', marginTop: 12, marginBottom: 20 },
   challenge: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: colors.cardElevated, borderRadius: radius.md, borderWidth: 1, borderColor: colors.cardBorderBright, padding: 14 },
   challengeEmoji: { fontSize: 28 },
-  challengeLabel: { fontSize: 9, fontWeight: '900', color: ORANGE, letterSpacing: 1.8, textTransform: 'uppercase', marginBottom: 5 },
+  challengeLabel: { fontSize: 9, fontWeight: '900', color: '#8A8A8A', letterSpacing: 1.8, textTransform: 'uppercase', marginBottom: 5 },
   challengeText:  { fontSize: 15, fontWeight: '700', color: colors.textPrimary, lineHeight: 22 },
 
   // Archive tab styles
   tabBtn:          { paddingHorizontal: 14, paddingVertical: 6, borderRadius: radius.full, borderWidth: 1, borderColor: colors.cardBorder },
-  tabBtnActive:    { backgroundColor: ORANGE, borderColor: ORANGE },
+  tabBtnActive:    { backgroundColor: colors.cardElevated, borderColor: colors.cardBorderBright },
   tabText:         { fontSize: 12, fontWeight: '700', color: colors.textMuted },
-  tabTextActive:   { color: colors.bg },
+  tabTextActive:   { color: colors.textPrimary },
   archiveList:     { width: 180, borderRightWidth: 1, borderRightColor: colors.cardBorder },
   archiveRow:      { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 14, borderBottomWidth: 1, borderBottomColor: colors.cardBorder },
   archiveRowActive:{ backgroundColor: colors.cardElevated },
   archiveTitle:    { fontSize: 13, fontWeight: '700', color: colors.textPrimary, lineHeight: 18 },
-  archiveToday:    { fontSize: 9, fontWeight: '800', color: ORANGE, letterSpacing: 1.5, marginTop: 3 },
+  archiveToday:    { fontSize: 9, fontWeight: '800', color: '#8A8A8A', letterSpacing: 1.5, marginTop: 3 },
 });
 
 // Action cards

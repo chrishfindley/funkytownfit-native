@@ -74,6 +74,7 @@ function CustomTabBar({ state, navigation, showTrainer }: {
 
   return (
     <View style={[styles.tabBar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
+      {/* Clean grey top border — no orange */}
       <View style={styles.topBorder} />
 
       {state.routes.map((route: any, index: number) => {
@@ -83,46 +84,46 @@ function CustomTabBar({ state, navigation, showTrainer }: {
 
         function onPress() {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          if (!isFocused) navigation.navigate(route.name);
+          // Always emit tabPress — nested stack navigators listen to this event
+          // to pop back to their root screen (fixes "Home doesn't work" bug)
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+          if (!event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
         }
-
-        const isTrainerTab   = tabDef.name === 'Trainer';
-        const isCommunityTab = tabDef.name === 'Community';
-
-        const activeColor = isTrainerTab
-          ? '#3B82F6'
-          : isCommunityTab
-          ? '#22C55E'
-          : colors.orange;
 
         return (
           <TouchableOpacity
             key={route.name}
             onPress={onPress}
-            activeOpacity={0.75}
+            activeOpacity={0.7}
             style={styles.tabItem}
           >
             {isFocused ? (
-              <View style={[
-                styles.activePill,
-                isTrainerTab   && { backgroundColor: 'rgba(59,130,246,0.12)', borderColor: 'rgba(59,130,246,0.35)' },
-                isCommunityTab && { backgroundColor: 'rgba(34,197,94,0.12)',  borderColor: 'rgba(34,197,94,0.35)' },
-              ]}>
+              // ── Active: white icon + white label in a subtle pill ──────────
+              <View style={styles.activePill}>
                 <Ionicons
                   name={tabDef.iconActive}
                   size={16}
-                  color={activeColor}
+                  color={colors.textPrimary}
                 />
-                <Text style={[
-                  styles.tabLabelActive,
-                  { color: activeColor },
-                ]}>
+                <Text style={styles.tabLabelActive}>
                   {tabDef.label}
                 </Text>
               </View>
             ) : (
+              // ── Inactive: white icon + white label, dimmed ─────────────────
               <>
-                <Ionicons name={tabDef.icon} size={22} color={colors.textMuted} style={{ opacity: 0.7 }} />
+                <Ionicons
+                  name={tabDef.icon}
+                  size={22}
+                  color='#FFFFFF'
+                  style={{ opacity: 0.38 }}
+                />
                 <Text style={styles.tabLabel}>{tabDef.label}</Text>
               </>
             )}
@@ -137,7 +138,6 @@ function CustomTabBar({ state, navigation, showTrainer }: {
 export default function TabNavigator() {
   const [showTrainer, setShowTrainer] = useState(false);
 
-  // Re-check trainer mode whenever this component gains focus
   useFocusEffect(useCallback(() => {
     isTrainerMode().then(setShowTrainer);
   }, []));
@@ -163,21 +163,22 @@ export default function TabNavigator() {
 const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: colors.bgSecondary,
+    backgroundColor: colors.bg,       // pure black — no warm tint
     paddingTop: 8,
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     alignItems: 'center',
+    borderTopWidth: 0,                // handled by topBorder below
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    elevation: 18,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 20,
   },
   topBorder: {
     position: 'absolute',
     top: 0, left: 0, right: 0,
     height: 1,
-    backgroundColor: colors.orangeBorder,
+    backgroundColor: colors.cardBorder,   // neutral grey — no orange
   },
   tabItem: {
     flex: 1,
@@ -186,35 +187,33 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     minHeight: 52,
   },
+  // ── Inactive labels ─────────────────────────────────────────────────────────
   tabLabel: {
     fontSize: 9,
     fontWeight: '600',
-    color: colors.textMuted,
+    color: '#FFFFFF',
+    opacity: 0.38,
     letterSpacing: 0.2,
     marginTop: 3,
   },
+  // ── Active pill — neutral dark, white text (orange is NOT the active color) ─
   activePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: colors.orangeDim,
+    backgroundColor: colors.cardElevated,    // subtle dark lift, no orange
     borderRadius: radius.full,
     borderWidth: 1,
-    borderColor: colors.cardBorder,
+    borderColor: colors.cardBorderBright,    // neutral grey border
     paddingHorizontal: 12,
     paddingVertical: 7,
     minWidth: 58,
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 4,
   },
   tabLabelActive: {
     fontSize: 11,
     fontWeight: '800',
-    color: colors.orange,
+    color: colors.textPrimary,   // pure white
     letterSpacing: 0.2,
   },
 });

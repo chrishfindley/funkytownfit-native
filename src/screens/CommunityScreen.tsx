@@ -29,6 +29,7 @@ import {
 } from '@/lib/messaging';
 import { getSession } from '@/lib/auth';
 import { fetchFortWorthEvents } from '@/lib/events';
+import FeaturedStory from '@/components/FeaturedStory';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -218,7 +219,7 @@ const pc = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.cardBorder,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarText: { fontSize: 16, fontWeight: '900', color: colors.orange },
+  avatarText: { fontSize: 16, fontWeight: '900', color: colors.textPrimary },
   authorName: { fontSize: 14, fontWeight: '700', color: colors.textPrimary },
   time:       { fontSize: 11, color: colors.textMuted, marginTop: 1 },
   badge: {
@@ -368,7 +369,7 @@ const ec = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.orange,
   },
   rsvpBtnActive: { backgroundColor: colors.orange },
-  rsvpText:  { fontSize: 11, fontWeight: '800', color: colors.orange, letterSpacing: 0.5 },
+  rsvpText:  { fontSize: 11, fontWeight: '800', color: colors.textPrimary, letterSpacing: 0.5 },
   rsvpCount: { fontSize: 11, fontWeight: '700', color: colors.orange },
 });
 
@@ -693,10 +694,10 @@ const chat = StyleSheet.create({
   },
   backBtn:    { padding: 4 },
   avatar:     { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.orangeDim, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: colors.orangeBorder },
-  avatarText: { fontSize: 14, fontWeight: '900', color: colors.orange },
+  avatarText: { fontSize: 14, fontWeight: '900', color: colors.textPrimary },
   otherName:  { flex: 1, ...typography.h3 },
   typeBadge:  { backgroundColor: colors.orangeDim, borderRadius: radius.full, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: colors.orangeBorder },
-  typeBadgeText: { fontSize: 9, fontWeight: '900', color: colors.orange, letterSpacing: 1 },
+  typeBadgeText: { fontSize: 9, fontWeight: '900', color: colors.textPrimary, letterSpacing: 1 },
   bubble:     { maxWidth: '75%', borderRadius: radius.lg, padding: 10, paddingHorizontal: 13 },
   mine:       { alignSelf: 'flex-end', backgroundColor: colors.orange, borderBottomRightRadius: 3 },
   theirs:     { alignSelf: 'flex-start', backgroundColor: colors.card, borderWidth: 1, borderColor: colors.cardBorder, borderBottomLeftRadius: 3 },
@@ -772,7 +773,7 @@ function InboxModal({
                       <Text style={{ fontSize: 14, fontWeight: '700', color: colors.textPrimary }}>{otherName(c)}</Text>
                       {c.convType === 'trainer_client' && (
                         <View style={{ backgroundColor: colors.orangeDim, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 }}>
-                          <Text style={{ fontSize: 8, fontWeight: '900', color: colors.orange, letterSpacing: 1 }}>TRAINER</Text>
+                          <Text style={{ fontSize: 8, fontWeight: '900', color: colors.textPrimary, letterSpacing: 1 }}>TRAINER</Text>
                         </View>
                       )}
                     </View>
@@ -992,6 +993,9 @@ export default function CommunityScreen() {
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.orange} />}
               contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: insets.bottom + spacing.xl + 20 }}
             >
+              {/* ── Featured Story ───────────────────────────────────────── */}
+              <FeaturedStory />
+
               {posts.length === 0 ? (
                 <View style={s.emptyState}>
                   <Text style={{ fontSize: 48 }}>{friends.length === 0 ? '🤝' : '🌆'}</Text>
@@ -1089,7 +1093,7 @@ export default function CommunityScreen() {
                   {pendingReqs.map(req => (
                     <View key={req.id} style={s.discoverItem}>
                       <View style={[s.discoverAvatar, { backgroundColor: colors.orangeDim, borderColor: colors.orangeBorder }]}>
-                        <Text style={{ fontSize: 16, fontWeight: '900', color: colors.orange }}>
+                        <Text style={{ fontSize: 16, fontWeight: '900', color: colors.textPrimary }}>
                           {(req.requesterName ?? 'U')[0].toUpperCase()}
                         </Text>
                       </View>
@@ -1266,7 +1270,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.orangeDim,
     borderBottomWidth: 1, borderBottomColor: colors.orangeBorder,
   },
-  pendingBannerText: { flex: 1, fontSize: 13, fontWeight: '600', color: colors.orange },
+  pendingBannerText: { flex: 1, fontSize: 13, fontWeight: '600', color: colors.textPrimary },
   pendingBannerBtn: { borderRadius: radius.full, paddingHorizontal: 12, paddingVertical: 5, backgroundColor: colors.orange },
   pendingBannerBtnText: { fontSize: 12, fontWeight: '800', color: colors.bg },
 
@@ -1280,7 +1284,7 @@ const s = StyleSheet.create({
   tabItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, paddingVertical: 11 },
   tabItemActive: { borderBottomWidth: 2, borderBottomColor: colors.orange },
   tabLabel:      { fontSize: 12, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
-  tabLabelActive: { color: colors.orange },
+  tabLabelActive: { color: colors.textPrimary },
 
   loader: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
@@ -1332,7 +1336,7 @@ const s = StyleSheet.create({
     borderRadius: radius.full, paddingHorizontal: 12, paddingVertical: 6,
     borderWidth: 1.5, borderColor: colors.orange,
   },
-  followBtnText: { fontSize: 11, fontWeight: '800', color: colors.orange },
+  followBtnText: { fontSize: 11, fontWeight: '800', color: colors.textPrimary },
 
   // Social guide card in Discover
   socialGuideCard: {
